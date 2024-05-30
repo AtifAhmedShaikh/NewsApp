@@ -25,7 +25,7 @@ const Router = () => {
   // useAutoLogin();
   return (
     <Routes>
-        <Route exact path="/" element={<LandingPage />} />
+      <Route exact path="/" element={<LandingPage />} />
 
       {/* public routes available only when user not authenticated */}
       <Route element={<AuthProtectedRoute />}>
@@ -49,7 +49,7 @@ const Router = () => {
       </Route>
       {/* protected routes for channels only channels can access */}
       <Route element={<ProtectedByChannel />}>
-        <Route exact path="/articles/create" element={<CreateArticle />} />
+        <Route exact path="/articles/publish-article" element={<CreateArticle />} />
         <Route exact path="/articles/update/:id" element={<UpdateArticle />} />
       </Route>
       {/* protected routes for Admin only App admin can access */}
