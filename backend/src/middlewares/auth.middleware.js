@@ -1,3 +1,4 @@
+import { ACCEPTED_STATUS, CHANNEL_ROLE } from "../constants.js";
 import { findUserById } from "../services/user.service.js";
 import ApiError from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -18,4 +19,15 @@ export const authenticateUser = asyncHandler(async (req, res, next) => {
   }
   req.user = user;
   next();
+});
+
+// middleware to check if user is an authorized news channel before allowing article publication
+export const isNewsChannel = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+  // when user account is channel and also admin approved his channel
+  if (user.role === CHANNEL_ROLE && user.channelApprovalStatus === ACCEPTED_STATUS) {
+    req.author = user;
+    return next();
+  }
+  throw new ApiError(401, "your not authorized to publish anything here");
 });

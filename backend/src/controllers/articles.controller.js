@@ -1,6 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
-  deleteArticleById,
   disLikeTheArticleByUser,
   findArticleById,
   findArticles,
@@ -10,62 +9,92 @@ import {
   findArticleCommentsById,
   addCommentOnArticle,
   findArticlesByQuery,
+  findArticle,
+  findArticleAndUpdate,
+  findArticleAndDelete,
 } from "../services/article.service.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import CustomError from "../utils/ApiError.js";
+import { validateSchema } from "../utils/validationHelper.js";
+import { publishArticleSchema } from "../schema/articleSchema.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import { isValidObjectId } from "mongoose";
 
-export const allArticles = asyncHandler(async (req, res) => {
+export const publishArticle = asyncHandler(async (req, res) => {
+  const validatedFields = validateSchema(publishArticleSchema, req.body);
+  const { title, markdownContent } = validatedFields;
+  const authorId = req.author?._id;
+  const createdArticle = await createArticle({ title, markdownContent, author: authorId });
+  if (!createdArticle) {
+    throw new ApiError(500, "Error while Creating Article on database");
+  }
+  new ApiResponse(201, { createdArticle }, "Article has published successfully").send(res);
+});
+
+export const getArticlesFeed = asyncHandler(async (req, res) => {
   const articles = await findArticles();
-  if (req.query.query) {
-    console.log(req.query);
-    const queryArticles = await findArticlesByQuery(req.query.query);
-    return res.status(200).json({ articles: queryArticles });
+  if (!articles?.length) {
+    throw new ApiError(500, "Error while fetching articles feed from database");
   }
-  res.status(200).json({ articles });
+  new ApiResponse(200, { articles }, "Articles Feed fetched successfully").send(res);
 });
 
-export const articleById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const article = await findArticleById(id);
-  res.status(200).json({ article });
+export const getArticleBySlug = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+  const article = await findArticle({ slug });
+  new ApiResponse(200, { article }, "Articles by slug fetched successfully").send(res);
 });
 
-//store new article in DB from writeArticle function,Integrate channel as a author
-export const addNewArticle = asyncHandler(async (req, res) => {
-  const { title, content, description } = req.body;
-  //validate article data
-  if ([title, content, description].some(field => field?.trim() === "")) {
-    throw new CustomError(400, "All fields are required");
+export const updatedArticleById = asyncHandler(async (req, res) => {
+  const articleId = req.params?.id;
+  const authorId = req.author?._id;
+  if (!isValidObjectId(articleId)) {
+    throw new ApiError(400, "please give valid article ID");
   }
-  if (!req.file.path) {
-    throw new CustomError(400, "please upload article Image ");
+  const validatedFields = validateSchema(publishArticleSchema, req.body);
+  const { title, markdownContent } = validatedFields;
+
+  const articleToUpdate = await findArticle({ _id: articleId });
+  if (!articleToUpdate) {
+    throw new ApiError(404, "article not found Invalid ID");
   }
-  const profileImage = await uploadOnCloudinary(req.file.path);
-  const authorId = req.author._id;
-  const createdArticle = await createArticle({
-    title,
-    content,
-    description,
-    urlToImage: profileImage.secure_url,
-    author: authorId,
-  });
-  res.status(201).json({
-    message: "your new article has successfully !",
-    article: createdArticle,
-  });
+  console.log(articleToUpdate.author?._id);
+  // check is author has authorized to modify article
+  if (String(articleToUpdate.author?._id) !== String(authorId)) {
+    throw new ApiError(404, "your not authorized to modify this article");
+  }
+  // update article
+  articleToUpdate.title = title;
+  articleToUpdate.markdownContent = markdownContent;
+  const updatedInfo = await articleToUpdate.save();
+  if (!updatedInfo) {
+    throw new ApiError(404, "Error while saving updated article info in dabatase");
+  }
+  new ApiResponse(200, { articleToUpdate }, "Article has updated successfully").send(res);
 });
 
-export const updateArticle = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { updatedArticle } = req.body;
-  await updateArticleById(id, updatedArticle);
-  res.status(200).json({ message: "article has successfully updated " });
-});
+export const deleteArticleById = asyncHandler(async (req, res) => {
+  const articleId = req.params?.id;
+  const authorId = req.author?._id;
+  if (!isValidObjectId(articleId)) {
+    throw new ApiError(400, "please give valid article ID");
+  }
 
-export const deleteArticle = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await deleteArticleById(id);
-  res.status(200).json({ message: "article has successfully deleted " });
+  const articleToDelete = await findArticle({ _id: articleId });
+  if (!articleToDelete) {
+    throw new ApiError(404, "article not found Invalid ID");
+  }
+
+  // check is author has authorized to delete article
+  if (String(articleToDelete.author?._id) !== String(authorId)) {
+    throw new ApiError(404, "your not authorized to delete this article");
+  }
+  const deletedArticle = await findArticleAndDelete({ _id: articleId });
+  // check is author has authorized to delete article
+  if (!deletedArticle) {
+    throw new ApiError(404, "Error while deleting article form database");
+  }
+  new ApiResponse(200, {}, "Article has been deleted successfully").send(res);
 });
 
 export const likeArticleById = asyncHandler(async (req, res) => {

@@ -1,7 +1,7 @@
 import { MODE } from "../config/envManager.js";
 
 export const errorHandler = (err, req, res, next) => {
-  console.log("Error has detected in error handler middleware !", err);
+  console.log("Error has detected in error handler middleware !");
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Something went wrong Please try again";
 

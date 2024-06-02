@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slug from "slug";
 
 const articleSchema = new mongoose.Schema(
   {
@@ -6,16 +7,11 @@ const articleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    description: {
+    slug: {
       type: String,
-      required: true,
     },
-    content: {
-      type: String,
-      required: true,
-    },
-    urlToImage: {
-      type: String,
+    markdownContent: {
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     author: {
@@ -26,6 +22,12 @@ const articleSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Generate slug from title
+articleSchema.pre("save", function (next) {
+  this.slug = slug(this.title?.toLowerCase());
+  next();
+});
 
 const ArticleModel = mongoose.model("article", articleSchema);
 

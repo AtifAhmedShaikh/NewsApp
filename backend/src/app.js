@@ -36,7 +36,10 @@ app.use("/api/v1/channels", channelRouter);
 app.use("/api/v1/collections", collectionRouter);
 
 app.get("/send-email", async (req, res) => {
-  const data = await UserModel.deleteMany({});
+  const data = await UserModel.findOneAndUpdate(
+    { _id: "665c4fdd2e29c0c04cc02702" },
+    { channelApprovalStatus: "ACCEPTED" },
+  );
   res.status(200).json({ data });
   // await sendEmail({
   //   sendTo: "user.email",

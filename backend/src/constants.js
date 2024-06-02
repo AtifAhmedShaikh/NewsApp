@@ -6,3 +6,8 @@ export const defaultBackgroundImage = "https://images5.alphacoders.com/325/32513
 export const USER_ROLE = "USER";
 export const CHANNEL_ROLE = "NEWS_CHANNEL";
 export const ADMIN_ROLE = "ADMIN"; // App owner
+
+// channel approval status
+export const ACCEPTED_STATUS = "ACCEPTED";
+export const REJECTED_STATUS = "REJECTED";
+export const PENDING_STATUS = "PENDING";

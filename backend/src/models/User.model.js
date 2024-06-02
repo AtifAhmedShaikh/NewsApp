@@ -3,7 +3,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import ApiError from "../utils/ApiError.js";
 import { assignAccessToken, assignRefreshToken } from "../utils/authUtils.js";
-import { ADMIN_ROLE, CHANNEL_ROLE, USER_ROLE } from "../constants.js";
+import { ACCEPTED_STATUS, ADMIN_ROLE, CHANNEL_ROLE, PENDING_STATUS, REJECTED_STATUS, USER_ROLE } from "../constants.js";
 import { generateToken } from "../utils/helper.js";
 
 const userSchema = new mongoose.Schema(
@@ -55,8 +55,8 @@ const userSchema = new mongoose.Schema(
     },
     channelApprovalStatus: {
       type: String,
-      enum: ["ACCEPTED", "REJECTED", "PENDING"],
-      default: "PENDING",
+      enum: [ACCEPTED_STATUS, REJECTED_STATUS, PENDING_STATUS],
+      default: PENDING_STATUS,
     },
     followers: [{ type: mongoose.SchemaTypes.ObjectId, ref: "user" }],
     following: [{ type: mongoose.SchemaTypes.ObjectId, ref: "user" }],
@@ -95,8 +95,8 @@ userSchema.post("save", function (error, doc, next) {
 
 // middleware to ensure only verified users are fetched every Database query
 userSchema.pre(["find", "findOne"], function (next) {
-  const isFetchByVerificationToken = Object.keys(this.getQuery()).includes("verificationToken");
-  if (isFetchByVerificationToken) return next();
+  const isFetchingByVerificationToken = Object.keys(this.getQuery()).includes("verificationToken");
+  if (isFetchingByVerificationToken) return next();
   this.where({ verified: true });
   next();
 });

@@ -10,6 +10,18 @@ export const findArticleById = async id => {
   return await ArticleModel.findById(id).populate("author");
 };
 
+export const findArticle = async query => {
+  return await ArticleModel.findOne(query).populate("author");
+};
+
+export const findArticleAndUpdate = async (query, updatedInfo) => {
+  return await ArticleModel.findOneAndUpdate(query, updatedInfo, { new: true }).populate("author");
+};
+
+export const findArticleAndDelete = async query => {
+  return await ArticleModel.findOneAndDelete(query);
+};
+
 export const findArticlesByQuery = async query => {
   const regex = new RegExp(query, "i");
   const articles = await ArticleModel.find({
@@ -24,10 +36,8 @@ export const findArticlesByQuery = async query => {
   return articles;
 };
 
-export const createArticle = async data => {
-  const newArr = new ArticleModel({ ...data });
-  const saved = await newArr.save();
-  return saved;
+export const createArticle = async articleData => {
+  return await ArticleModel.create(articleData);
 };
 
 export const updateArticleById = async (id, updated) => {

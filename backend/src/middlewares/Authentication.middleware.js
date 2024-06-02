@@ -40,6 +40,7 @@ export const isNewsChannel = async (req, res, next) => {
     console.log("error in token of middleware !");
   }
 };
+
 //middleware of check admin role
 export const isAdmin = async (req, res, next) => {
   const user = req.user;
