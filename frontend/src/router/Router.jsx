@@ -40,9 +40,9 @@ const Router = () => {
       {/* protected routes for authenticated users */}
       <Route element={<ProtectedByUser />}>
         <Route exact path="/articles" element={<ArticleList />} />
+        <Route exact path="/articles/:slug" element={<ArticleDetailsPage />} />
         <Route exact path="/channels" element={<ChannelsList />} />
         <Route exact path="/channels/:id" element={<ChannelProfile />} />
-        <Route exact path="/articles/:id" element={<ArticleDetailsPage />} />
         <Route exact path="/settings" element={<Settings />} />
         <Route exact path="/saved" element={<Collection />} />
         <Route path="*" element={<NotFoundPage />} />

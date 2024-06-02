@@ -56,7 +56,7 @@ instance.interceptors.request.use(requestInterceptor);
 const getRequest = async (endpoint, params = {}) => {
   try {
     const response = await instance.get(endpoint, { params });
-    return response.data;
+    return response;
   } catch (error) {
     return error;
   }

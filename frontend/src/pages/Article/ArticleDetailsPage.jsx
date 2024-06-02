@@ -19,6 +19,8 @@ import {
   likeArticleById,
   addToCollection,
 } from "../../api/articles.js";
+import { getRequest } from "@/api/apiServices";
+import { JSONToHTML } from "html-to-json-parser";
 
 const ArticleDetailsPage = () => {
   const user = useSelector((state) => state.auth.user);
@@ -27,20 +29,21 @@ const ArticleDetailsPage = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setLiked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchArticleData = async () => {
       try {
-        const response = await fetchArticleById(id);
-        if (!response) return;
+        const response = await getRequest(`/api/v1/articles/article-details/${slug}`);
+        if (!response.success) return;
+        const fetchedArticle = response.data.article;
+        console.log(fetchedArticle);
+        const htmlContent = await JSONToHTML(fetchedArticle.markdownContent);
+        const isCurrentChannelArticle = fetchedArticle?.author?._id === user?._id;
 
-        const { article: fetchedArticle } = response.data;
-        const isCurrentChannelArticle = fetchedArticle.author._id === user._id;
-
-        setArticle({ ...fetchedArticle, isCurrentChannelArticle });
-        setLikeCount(fetchedArticle.likes.length);
+        setArticle({ ...fetchedArticle, isCurrentChannelArticle, htmlContent });
+        setLikeCount(fetchedArticle.likes?.length);
         setLiked(fetchedArticle.likes.includes(user._id));
         setLoading(false);
       } catch (error) {
@@ -49,7 +52,7 @@ const ArticleDetailsPage = () => {
     };
 
     fetchArticleData();
-  }, [user, id, user._id]);
+  }, [user, user._id]);
 
   const handleLike = async () => {
     setLiked(true);
@@ -91,16 +94,9 @@ const ArticleDetailsPage = () => {
           author={article.author}
           createdAt={article.createdAt}
         />
-        <ArticleContent
-          content={article.content}
-          description={article.description}
-        />
-        <ArticleActions
-          likeCount={likeCount}
-          isLiked={isLiked}
-          handleLike={handleLike}
-          handleDisLike={handleDisLike}
-        />
+        {article.htmlContent}
+        {/* <ArticleContent content={article.content} description={article.description} /> */}
+        <ArticleActions likeCount={likeCount} isLiked={isLiked} handleLike={handleLike} handleDisLike={handleDisLike} />
         <ArticleButtons
           isSavedArticle={isSavedArticle}
           handleSave={handleSave}
@@ -110,7 +106,7 @@ const ArticleDetailsPage = () => {
           articleId={article._id}
         />
       </Container>
-      <CommentsContainer />
+      {/* <CommentsContainer /> */}
       <BottomBar />
     </React.Fragment>
   );

@@ -17,7 +17,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 // "sweetalert2": "^11.10.2"
 export const fetchArticles = async () => {
   const response = await asyncHandler(async () => {
-    return await api.get("/api/v1/articles/all");
+    return await api.get("/api/v1/articles");
   });
   return response;
 };
@@ -106,10 +106,9 @@ export const addCommentOnArticle = async (articleId, commentText) => {
   return response;
 };
 
-
-export const fetchArticleByQuery=async(query)=>{
+export const fetchArticleByQuery = async (query) => {
   const response = await asyncHandler(async () => {
     return await api.get(`/api/v1/articles/all?query=${query}`);
   });
   return response;
-}
+};

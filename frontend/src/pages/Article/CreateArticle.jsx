@@ -15,7 +15,7 @@ const CreateArticlePage = () => {
       <Navbar />
       <BackBar />
       <Container className="flex flex-col justify-center items-center">
-        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mt-3">Pubish your Article</h3>
+        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mt-3">Publish your Article</h3>
         <div className="text-center">
           {adminApproval === "REJECTED" && (
             <p className="text-xl text-red-700">your channel has rejected by admin, you not be able to write article</p>

@@ -26,7 +26,7 @@ const PublishArticleForm = () => {
     setLoading(true);
     setErrorMessage("");
     const convertedMartdown = await HTMLToJSON(content, true);
-    const articleData = { title: title.toLowerCase(), content: convertedMartdown };
+    const articleData = { title: title.toLowerCase(), markdownContent: convertedMartdown };
     console.log("Article submitted:", articleData);
     const response = await postRequest("/api/v1/articles/publish-article", articleData);
     setLoading(false);

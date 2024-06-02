@@ -14,7 +14,7 @@ router.use(authenticateUser);
 
 router.route("/").get(getArticlesFeed);
 
-router.route("/article-slug/:slug").get(getArticleBySlug);
+router.route("/article-details/:slug").get(getArticleBySlug);
 
 router.route("/publish-article").post(isNewsChannel, publishArticle);
 

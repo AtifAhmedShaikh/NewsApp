@@ -7,19 +7,21 @@ import Loader from "../../components/UI/Loader";
 import { fetchArticles } from "../../api/articles";
 import Navbar from "@/components/Navbar/Navbar";
 import { Button } from "../../components/UI/button";
+import { useNavigate } from "react-router-dom";
+import { getRequest } from "@/api/apiServices";
 
 const Articles = () => {
   const [articles, setArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
-      const response = await fetchArticles();
-      if (!response) return;
+      const response = await getRequest("/api/v1/articles/");
+      if (!response.success) return;
       setArticles(response.data.articles);
-      console.log(response);
       setLoading(false);
     })();
   }, []);
@@ -43,8 +45,8 @@ const Articles = () => {
     <React.Fragment>
       <Navbar />
       <BackBar pageLabel={"Articles"} />
-      <div className="font-sans text-black sm:px-10 mt-4 bg-background w-screen flex items-center justify-center">
-        <div className="border rounded overflow-hidden flex justify-between inherit" style={{ width: "inherit" }}>
+      <div className="font-sans text-black sm:px-10 mt-4 bg-background flex items-center justify-center">
+        <div className="border rounded overflow-hidden flex justify-between w-10/12" style={{ width: "inherit" }}>
           <input type="text" className="px-3 bg-inherit py-2 w-[100%] text-foreground" placeholder="Search..." />
           <button className="flex items-center justify-center px-4 border-l bg-secondary text-foreground">
             <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -52,6 +54,9 @@ const Articles = () => {
             </svg>
           </button>
         </div>
+        <Button className="mx-5 " onClick={() => navigate("/articles/publish-article")}>
+          Upload Article
+        </Button>
       </div>
       <div className="flex justify-start ml-5 gap-3 mt-3">
         <Button variant={"secondary"} className="px-2 py-2" onClick={() => sortArticles("latest")}>
@@ -61,7 +66,7 @@ const Articles = () => {
           Oldest News
         </Button>
       </div>
-      <Container className="flex justify-center items-start md:flex-wrap sm:flex-wrap flex-wrap gap-5">
+      <Container className="flex justify-center items-start md:flex-wrap sm:flex-wrap flex-wrap gap-5 mt-10">
         {loading && <Loader />}
         {!loading && searchQuery && filteredArticles.length === 0 && <p>articles not found from ` {searchQuery} `</p>}
         {filteredArticles?.map((article) => {
